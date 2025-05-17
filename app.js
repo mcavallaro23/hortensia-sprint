@@ -289,3 +289,41 @@ function renderPhotocellScan() {
   const screen = document.getElementById('screen');
   screen.innerHTML = "<h2>Scan Photocells</h2><button onclick='scanPhotocells()'>Scan & Connect</button>";
 }
+
+
+function saveFinalResult(test, results) {
+  const stored = JSON.parse(localStorage.getItem('finishedTests') || '[]');
+  const entry = {
+    name: test.name,
+    date: new Date().toISOString(),
+    athletes: results
+  };
+  stored.push(entry);
+  localStorage.setItem('finishedTests', JSON.stringify(stored));
+}
+
+function renderResults() {
+  const data = JSON.parse(localStorage.getItem('finishedTests') || '[]');
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>Results</h2>";
+
+  if (data.length === 0) {
+    screen.innerHTML += "<p>No results found.</p>";
+    return;
+  }
+
+  data.forEach((entry, index) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3>${entry.name} - ${new Date(entry.date).toLocaleString()}</h3>
+      <table>
+        <thead><tr><th>Athlete</th><th>Time</th></tr></thead>
+        <tbody>
+          ${entry.athletes.map(a => `<tr><td>${a.name}</td><td>${a.time}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <button onclick="exportResult(${index})">📤 Share</button>
+    `;
+    screen.appendChild(div);
+  });
+}
