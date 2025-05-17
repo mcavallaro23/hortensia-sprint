@@ -272,7 +272,6 @@ function recordImpulse() {
     if (testQueue.length > 0) {
       setTimeout(() => loadTest(currentTestIndex), 1500);
     } else {
-      saveFinalResult(tests[currentTestIndex], finishedAthletes);
       testInProgress = false;
       document.removeEventListener("photocellTrigger", handlePhotocellStart);
     }
@@ -324,6 +323,36 @@ function renderResults() {
         </tbody>
       </table>
       <button onclick="exportResult(${index})">📤 Share</button>
+    `;
+    screen.appendChild(div);
+  });
+}
+
+function renderResults() {
+  const data = JSON.parse(localStorage.getItem('finishedTests') || '[]');
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>Results</h2>";
+
+  if (!data.length) {
+    screen.innerHTML += "<p>No results found.</p>";
+    return;
+  }
+
+  data.forEach((entry, index) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <h3>${entry.name || 'Unnamed Test'} - ${new Date(entry.date).toLocaleString()}</h3>
+      <table>
+        <thead><tr><th>Athlete</th><th>Time</th></tr></thead>
+        <tbody>
+          ${(entry.athletes || []).map(a => `
+            <tr>
+              <td>${a.name}</td>
+              <td>${a.time}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
     `;
     screen.appendChild(div);
   });
