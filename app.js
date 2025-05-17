@@ -284,3 +284,8 @@ function updateAthleteLists() {
   if (waiting) waiting.innerHTML = testQueue.map(a => `<li>${a}</li>`).join('');
   if (finished) finished.innerHTML = finishedAthletes.map(a => `<li>${a.name}: ${a.time}</li>`).join('');
 }
+
+function renderPhotocellScan() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>Scan Photocells</h2><button onclick='scanPhotocells()'>Scan & Connect</button>";
+}
