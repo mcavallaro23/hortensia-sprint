@@ -1,24 +1,35 @@
 
-body {
+body.dark-mode {
+  background-color: #121212;
+  color: #f0f0f0;
   font-family: sans-serif;
   padding: 20px;
 }
 button {
   margin: 10px;
-  padding: 10px 20px;
-  font-size: 16px;
+  padding: 12px 24px;
+  font-size: 18px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 6px;
 }
 input, select {
   margin: 5px;
-  padding: 5px;
-  font-size: 14px;
+  padding: 10px;
+  font-size: 16px;
+  background: #1f1f1f;
+  color: white;
+  border: 1px solid #444;
 }
 table {
   border-collapse: collapse;
   margin-top: 20px;
+  width: 100%;
 }
 th, td {
-  border: 1px solid #ccc;
+  border: 1px solid #666;
   padding: 6px 10px;
   text-align: right;
+  color: white;
 }
