@@ -272,6 +272,7 @@ function recordImpulse() {
     if (testQueue.length > 0) {
       setTimeout(() => loadTest(currentTestIndex), 1500);
     } else {
+      saveFinalResult(tests[currentTestIndex], finishedAthletes);
       testInProgress = false;
       document.removeEventListener("photocellTrigger", handlePhotocellStart);
     }
