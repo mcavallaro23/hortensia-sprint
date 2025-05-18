@@ -189,16 +189,29 @@ function renderPhotocellScan() {
 
 function scanPhotocells() {
   navigator.bluetooth.requestDevice({
-    filters: [{ namePrefix: 'CRONOPIC-F' }],
-    optionalServices: []
-  })
-  .then(device => {
-    const ul = document.getElementById('deviceList');
-    const li = document.createElement('li');
-    li.textContent = `Connected to: ${device.name}`;
-    ul.appendChild(li);
-  })
-  .catch(error => {
-    alert('BLE error: ' + error.message);
+  filters: [{ namePrefix: 'CRONOPIC-F' }],
+  optionalServices: [0xFFE0] // adaptá esto si usás otro UUID
+})
+.then(device => {
+  return device.gatt.connect();
+})
+.then(server => {
+  return server.getPrimaryService(0xFFE0);
+})
+.then(service => {
+  return service.getCharacteristic(0xFFE1);
+})
+.then(characteristic => {
+  return characteristic.startNotifications().then(() => {
+    characteristic.addEventListener('characteristicvaluechanged', event => {
+      const value = new TextDecoder().decode(event.target.value);
+      alert('Received: ' + value);
+    });
+    alert("CONNECTED and listening");
   });
+})
+.catch(error => {
+  alert("BLE Error: " + error.message);
+});
+
 }
