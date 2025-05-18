@@ -132,7 +132,7 @@ function selectAthletesForTest(index) {
   const screen = document.getElementById('screen');
   screen.innerHTML = `
     <h2>Select Athletes for "${test.name}"</h2>
-    <div class="athlete-selection" style="display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    <div style="display: flex; gap: 20px; justify-content: center; align-items: center;">
       <div>
         <h3>ATHLETES</h3>
         <select id="allAthletes" size="10" style="min-width: 200px;" multiple>
@@ -190,26 +190,15 @@ function renderPhotocellScan() {
 function scanPhotocells() {
   navigator.bluetooth.requestDevice({
     filters: [{ namePrefix: 'CRONOPIC-F' }],
-    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
+    optionalServices: []
   })
-  .then(device => device.gatt.connect())
-  .then(server => server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e'))
-  .then(service => service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e'))
-  .then(characteristic => {
-    characteristic.startNotifications();
-    characteristic.addEventListener('characteristicvaluechanged', event => {
-      const value = new TextDecoder().decode(event.target.value);
-      console.log("Trama recibida:", value);
-      alert("Trama recibida: " + value); // luego se reemplaza por lógica real
-    });
-
+  .then(device => {
     const ul = document.getElementById('deviceList');
     const li = document.createElement('li');
-    li.textContent = `Connected & listening: CRONOPIC`;
+    li.textContent = `Connected to: ${device.name}`;
     ul.appendChild(li);
   })
   .catch(error => {
     alert('BLE error: ' + error.message);
   });
 }
-
