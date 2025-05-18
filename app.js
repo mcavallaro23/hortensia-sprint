@@ -14,7 +14,6 @@ let testInProgress = false;
 window.navigate = function(screen) {
   const screenDiv = document.getElementById('screen');
   if (!screenDiv) return;
-
   switch (screen) {
     case 'testMenu':
       screenDiv.innerHTML = `
@@ -44,6 +43,23 @@ window.navigate = function(screen) {
       screenDiv.innerHTML = `<h2>${screen}</h2>`;
   }
 };
+
+function renderTestList() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>My Tests</h2>";
+  if (!tests.length) {
+    screen.innerHTML += "<p>No saved tests found.</p>";
+    return;
+  }
+  tests.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <p><strong>${t.name}</strong> - ${t.type || ''}</p>
+      <button onclick="selectAthletesForTest(${i})">Start Test</button>
+    `;
+    screen.appendChild(div);
+  });
+}
 
 function renderNewTestForm() {
   const screen = document.getElementById('screen');
@@ -93,86 +109,9 @@ function saveTest() {
   alert("Test saved!");
 }
 
-function renderPhotocellScan() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML = "<h2>Scan Photocells</h2><button onclick='scanPhotocells()'>Scan & Connect</button>";
-}
-
-function saveFinalResult(test, results) {
-  const stored = JSON.parse(localStorage.getItem('finishedTests') || '[]');
-  const entry = {
-    name: test.name,
-    date: new Date().toISOString(),
-    athletes: results
-  };
-  stored.push(entry);
-  localStorage.setItem('finishedTests', JSON.stringify(stored));
-}
-
-function renderResults() {
-  const data = JSON.parse(localStorage.getItem('finishedTests') || '[]');
-  const screen = document.getElementById('screen');
-  screen.innerHTML = "<h2>Results</h2>";
-
-  if (!data.length) {
-    screen.innerHTML += "<p>No results found.</p>";
-    return;
-  }
-
-  data.forEach((entry, index) => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <h3>${entry.name || 'Unnamed Test'} - ${new Date(entry.date).toLocaleString()}</h3>
-      <table>
-        <thead><tr><th>Athlete</th><th>Time</th></tr></thead>
-        <tbody>
-          ${(entry.athletes || []).map(a => `
-            <tr>
-              <td>${a.name}</td>
-              <td>${a.time}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-    screen.appendChild(div);
-  });
-}
-
-function renderDebugTools() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML += '<button onclick="forceSaveTest()">💾 Forzar Guardado Manual</button>';
-}
-
-function forceSaveTest() {
-  if (finishedAthletes.length && tests[currentTestIndex]) {
-    saveFinalResult(tests[currentTestIndex], finishedAthletes);
-    alert("Guardado forzado realizado.");
-  } else {
-    alert("No hay datos para guardar.");
-  }
-}
-
-function renderTestList() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML = "<h2>My Tests</h2>";
-  if (!tests.length) {
-    screen.innerHTML += "<p>No saved tests found.</p>";
-    return;
-  }
-  tests.forEach((t, i) => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <p><strong>${t.name}</strong> - ${t.type || ''}</p>
-      <button onclick="selectAthletesForTest(${i})">Start Test</button>
-    `;
-    screen.appendChild(div);
-  });
-}
-
 function renderAthleteManager() {
   const screen = document.getElementById('screen');
-  screen.innerHTML = \`
+  screen.innerHTML = `
     <h2>Athletes</h2>
     <label>Name: <input id="aName"></label><br>
     <label>Birthdate: <input type="date" id="aBirth"></label><br>
@@ -187,7 +126,7 @@ function renderAthleteManager() {
     <label>Club: <input id="aClub"></label><br>
     <button onclick="saveAthlete()">Save Athlete</button>
     <ul id="athleteList"></ul>
-  \`;
+  `;
   updateAthleteList();
 }
 
