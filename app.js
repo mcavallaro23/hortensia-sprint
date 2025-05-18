@@ -132,7 +132,7 @@ function selectAthletesForTest(index) {
   const screen = document.getElementById('screen');
   screen.innerHTML = `
     <h2>Select Athletes for "${test.name}"</h2>
-    <div style="display: flex; gap: 20px; justify-content: center; align-items: center;">
+    <div class="athlete-selection" style="display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap;">
       <div>
         <h3>ATHLETES</h3>
         <select id="allAthletes" size="10" style="min-width: 200px;" multiple>

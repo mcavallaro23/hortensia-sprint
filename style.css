@@ -33,3 +33,21 @@ th, td {
   text-align: right;
   color: white;
 }
+
+@media (max-width: 600px) {
+  .athlete-selection {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .athlete-selection > div {
+    width: 100% !important;
+    max-width: 300px;
+    text-align: center;
+  }
+
+  .athlete-selection select {
+    width: 100% !important;
+    font-size: 18px;
+  }
+}
