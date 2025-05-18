@@ -2,6 +2,27 @@
 let tests = JSON.parse(localStorage.getItem('tests') || '[]');
 let athletes = JSON.parse(localStorage.getItem('athletes') || '[]');
 
+function renderNewTestForm() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = `
+    <h2>Create New Test</h2>
+    <label>Test Name: <input id="testName" /></label><br>
+    <label>Captures: <input id="impulses" type="number" value="3" min="1" /></label><br>
+    <button onclick="saveTest()">Save Test</button>
+  `;
+}
+
+function saveTest() {
+  const test = {
+    name: document.getElementById('testName').value,
+    impulses: parseInt(document.getElementById('impulses').value)
+  };
+  tests.push(test);
+  localStorage.setItem('tests', JSON.stringify(tests));
+  alert("Test saved.");
+}
+
+
 window.navigate = function(screen) {
   const screenDiv = document.getElementById('screen');
   if (!screenDiv) return;
@@ -16,7 +37,10 @@ window.navigate = function(screen) {
         <button onclick="navigate('newTest')">New Test</button>
       `;
       break;
-    case 'myTests':
+    case 'newTest':
+      renderNewTestForm();
+      break;
+      case 'myTests':
       renderTestList();
       break;
     case 'athletes':
