@@ -59,6 +59,9 @@ window.navigate = function(screen) {
     case 'results':
       renderResults();
       break;
+    case 'photocells':
+      renderPhotocellScan();
+      break;
     default:
       screenDiv.innerHTML = `<p>Pantalla ${screen} no implementada aún.</p>`;
   }
