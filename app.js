@@ -162,6 +162,39 @@ function formatTime(ms) {
   const cent = Math.floor((ms % 1000) / 10);
   return `${sec.toString().padStart(2, '0')}.${cent.toString().padStart(2, '0')}`;
 }
+window.navigate = function(screen) {
+  const screenDiv = document.getElementById('screen');
+  if (!screenDiv) return;
+
+  switch (screen) {
+    case 'testMenu':
+      screenDiv.innerHTML = `
+        <h2>Test Menu</h2>
+        <button onclick="navigate('simpleTest')">Simple Test</button>
+        <button onclick="navigate('myTests')">My Tests</button>
+        <button onclick="navigate('predefinedTests')">Predefined Tests</button>
+        <button onclick="navigate('newTest')">New Test</button>
+      `;
+      break;
+    case 'newTest':
+      renderNewTestForm();
+      break;
+    case 'myTests':
+      renderTestList();
+      break;
+    case 'athletes':
+      renderAthleteManager();
+      break;
+    case 'results':
+      renderResults();
+      break;
+    case 'photocells':
+      renderPhotocellScan();
+      break;
+    default:
+      screenDiv.innerHTML = `<p>Pantalla ${screen} no implementada aún.</p>`;
+  }
+};
 
 function renderPhotocellScan() {
   const screen = document.getElementById("screen");
