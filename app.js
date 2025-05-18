@@ -152,3 +152,66 @@ function forceSaveTest() {
     alert("No hay datos para guardar.");
   }
 }
+
+function renderTestList() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>My Tests</h2>";
+  if (!tests.length) {
+    screen.innerHTML += "<p>No saved tests found.</p>";
+    return;
+  }
+  tests.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <p><strong>${t.name}</strong> - ${t.type || ''}</p>
+      <button onclick="selectAthletesForTest(${i})">Start Test</button>
+    `;
+    screen.appendChild(div);
+  });
+}
+
+function renderAthleteManager() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = \`
+    <h2>Athletes</h2>
+    <label>Name: <input id="aName"></label><br>
+    <label>Birthdate: <input type="date" id="aBirth"></label><br>
+    <label>Height (cm): <input type="number" id="aHeight"></label><br>
+    <label>Weight (kg): <input type="number" id="aWeight"></label><br>
+    <label>Sex: 
+      <select id="aSex">
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+      </select>
+    </label><br>
+    <label>Club: <input id="aClub"></label><br>
+    <button onclick="saveAthlete()">Save Athlete</button>
+    <ul id="athleteList"></ul>
+  \`;
+  updateAthleteList();
+}
+
+function saveAthlete() {
+  const athlete = {
+    name: document.getElementById('aName').value,
+    birth: document.getElementById('aBirth').value,
+    height: document.getElementById('aHeight').value,
+    weight: document.getElementById('aWeight').value,
+    sex: document.getElementById('aSex').value,
+    club: document.getElementById('aClub').value
+  };
+  athletes.push(athlete);
+  localStorage.setItem('athletes', JSON.stringify(athletes));
+  updateAthleteList();
+}
+
+function updateAthleteList() {
+  const ul = document.getElementById('athleteList');
+  if (!ul) return;
+  ul.innerHTML = "";
+  athletes.forEach(a => {
+    const li = document.createElement('li');
+    li.textContent = a.name + " (" + a.club + ")";
+    ul.appendChild(li);
+  });
+}
