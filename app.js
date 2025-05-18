@@ -188,31 +188,44 @@ function renderPhotocellScan() {
 }
 
 function scanPhotocells() {
+  let device;
+  let characteristic;
+
   navigator.bluetooth.requestDevice({
     filters: [{ namePrefix: 'CRONOPIC-F' }]
   })
-  .then(device => device.gatt.connect())
-  .then(server => server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e'))
-  .then(service => service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e'))
-  .then(characteristic => {
-    return characteristic.startNotifications().then(() => {
-      characteristic.addEventListener('characteristicvaluechanged', event => {
-        const value = new TextDecoder().decode(event.target.value);
-        console.log("Trama recibida:", value);
-        alert("Trama recibida: " + value);
-      });
-
-      const ul = document.getElementById('deviceList');
-      const li = document.createElement('li');
-      li.textContent = `Conectado correctamente a: CRONOPIC`;
-      ul.appendChild(li);
+  .then(dev => {
+    device = dev;
+    return device.gatt.connect();
+  })
+  .then(server => {
+    return server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+  })
+  .then(service => {
+    return service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e');
+  })
+  .then(char => {
+    characteristic = char;
+    return characteristic.startNotifications();
+  })
+  .then(() => {
+    characteristic.addEventListener('characteristicvaluechanged', event => {
+      const value = new TextDecoder().decode(event.target.value);
+      console.log("Trama recibida:", value);
+      alert("Trama recibida: " + value);
     });
+
+    const ul = document.getElementById('deviceList');
+    const li = document.createElement('li');
+    li.textContent = `✅ Conectado a: ${device.name}`;
+    ul.appendChild(li);
   })
   .catch(error => {
     console.error('BLE error:', error);
     alert('BLE error: ' + error.message);
   });
 }
+
 
 
 
