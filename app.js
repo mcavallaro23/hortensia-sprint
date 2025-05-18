@@ -191,8 +191,12 @@ function scanPhotocells() {
   let device;
   let characteristic;
 
+  // Limpia la lista antes de escanear
+  const ul = document.getElementById('deviceList');
+  if (ul) ul.innerHTML = "";
+
   navigator.bluetooth.requestDevice({
-    acceptAllDevices: true,
+    filters: [{ namePrefix: 'CRONOPIC' }], // Ajusta según el nombre de tu dispositivo
     optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
   })
   .then(dev => {
@@ -213,7 +217,11 @@ function scanPhotocells() {
     characteristic.addEventListener('characteristicvaluechanged', event => {
       const decoded = new TextDecoder().decode(event.target.value);
       console.log("📡 Trama recibida:", decoded);
-      alert("Trama recibida: " + decoded);
+      // Mejor mostrar en pantalla en vez de alert
+      const ul = document.getElementById('deviceList');
+      const li = document.createElement('li');
+      li.textContent = `Trama recibida: ${decoded}`;
+      ul.appendChild(li);
     });
 
     const ul = document.getElementById('deviceList');
