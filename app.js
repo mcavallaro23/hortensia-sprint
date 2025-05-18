@@ -201,6 +201,11 @@ function scanPhotocells() {
         console.log("Trama recibida:", value);
         alert("Trama recibida: " + value);
       });
+
+      const ul = document.getElementById('deviceList');
+      const li = document.createElement('li');
+      li.textContent = `Conectado correctamente a: CRONOPIC`;
+      ul.appendChild(li);
     });
   })
   .catch(error => {
@@ -208,5 +213,6 @@ function scanPhotocells() {
     alert('BLE error: ' + error.message);
   });
 }
+
 
 
