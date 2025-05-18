@@ -1,13 +1,14 @@
 let tests = JSON.parse(localStorage.getItem('tests') || '[]');
 let athletes = JSON.parse(localStorage.getItem('athletes') || '[]');
+
 let startTime = null;
 let animationFrame = null;
 let impulseCount = 0;
 let expectedImpulses = 0;
 let running = false;
+let inTest = false;
 let splits = [];
 let laps = [];
-let inTest = false; // ← NUEVO: indica si estamos en ejecución real
 
 function renderNewTestForm() {
   const screen = document.getElementById('screen');
@@ -104,12 +105,6 @@ function manualStart() {
   }
 }
 
-function formatTime(ms) {
-  const sec = Math.floor(ms / 1000);
-  const cent = Math.floor((ms % 1000) / 10);
-  return `${sec.toString().padStart(2, '0')}.${cent.toString().padStart(2, '0')}`;
-}
-
 function startChronometer(test) {
   impulseCount = 0;
   expectedImpulses = test.impulses + 1;
@@ -121,8 +116,7 @@ function startChronometer(test) {
 
 function handleImpulse() {
   const now = performance.now();
-
-  if (!inTest) return; // ← solo actúa si estamos dentro del test
+  if (!inTest) return;
 
   if (!running) {
     startTime = now;
@@ -146,9 +140,7 @@ function handleImpulse() {
   row.innerHTML = `<td>${formatTime(split)}</td><td>${formatTime(lap)}</td>`;
   tbody.appendChild(row);
 
-  if (impulseCount >= expectedImpulses - 1) {
-    stopChrono();
-  }
+  if (impulseCount >= expectedImpulses - 1) stopChrono();
 }
 
 function updateChrono() {
@@ -163,6 +155,12 @@ function stopChrono() {
   running = false;
   inTest = false;
   cancelAnimationFrame(animationFrame);
+}
+
+function formatTime(ms) {
+  const sec = Math.floor(ms / 1000);
+  const cent = Math.floor((ms % 1000) / 10);
+  return `${sec.toString().padStart(2, '0')}.${cent.toString().padStart(2, '0')}`;
 }
 
 function renderPhotocellScan() {
@@ -190,8 +188,12 @@ function scanPhotocells() {
     device = dev;
     return device.gatt.connect();
   })
-  .then(server => server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'))
-  .then(service => service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'))
+  .then(server => {
+    return server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+  })
+  .then(service => {
+    return service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+  })
   .then(char => {
     characteristic = char;
     return characteristic.startNotifications();
@@ -200,10 +202,12 @@ function scanPhotocells() {
     characteristic.addEventListener('characteristicvaluechanged', event => {
       const decoded = new TextDecoder().decode(event.target.value);
       console.log("📡 Trama recibida:", decoded);
+      
+      if (!inTest) {
+        alert("Trama recibida: " + decoded);
+      }
 
-      if (!inTest) alert("Trama recibida: " + decoded); // solo alerta fuera del test
-
-      handleImpulse(); // este solo actúa si estamos en test
+      handleImpulse();
     });
 
     const ul = document.getElementById('deviceList');
