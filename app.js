@@ -191,23 +191,23 @@ function scanPhotocells() {
   let device;
   let characteristic;
 
-  // Limpia la lista antes de escanear
-  const ul = document.getElementById('deviceList');
-  if (ul) ul.innerHTML = "";
-
   navigator.bluetooth.requestDevice({
-    filters: [{ namePrefix: 'CRONOPIC' }], // Ajusta según el nombre de tu dispositivo
-    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
+    acceptAllDevices: true,
+    optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
   })
   .then(dev => {
+    if (!dev.name || !dev.name.startsWith('CRONOPIC-F')) {
+      alert(`Dispositivo ignorado: ${dev.name || '(sin nombre)'}`);
+      throw new Error("Dispositivo no es CRONOPIC-FX");
+    }
     device = dev;
     return device.gatt.connect();
   })
   .then(server => {
-    return server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+    return server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
   })
   .then(service => {
-    return service.getCharacteristic('6e400003-b5a3-f393-e0a9-e50e24dcca9e');
+    return service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
   })
   .then(char => {
     characteristic = char;
@@ -217,11 +217,7 @@ function scanPhotocells() {
     characteristic.addEventListener('characteristicvaluechanged', event => {
       const decoded = new TextDecoder().decode(event.target.value);
       console.log("📡 Trama recibida:", decoded);
-      // Mejor mostrar en pantalla en vez de alert
-      const ul = document.getElementById('deviceList');
-      const li = document.createElement('li');
-      li.textContent = `Trama recibida: ${decoded}`;
-      ul.appendChild(li);
+      alert("Trama recibida: " + decoded);
     });
 
     const ul = document.getElementById('deviceList');
@@ -230,8 +226,10 @@ function scanPhotocells() {
     ul.appendChild(li);
   })
   .catch(error => {
-    console.error('❌ BLE error:', error);
-    alert('BLE error: ' + error.message);
+    if (error.message !== "Dispositivo no es CRONOPIC-FX") {
+      console.error('❌ BLE error:', error);
+      alert('BLE error: ' + error.message);
+    }
   });
 }
 
