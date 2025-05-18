@@ -193,7 +193,7 @@ function scanPhotocells() {
 
   navigator.bluetooth.requestDevice({
     acceptAllDevices: true,
-    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] // único UUID que realmente vas a usar
+    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
   })
   .then(dev => {
     device = dev;
