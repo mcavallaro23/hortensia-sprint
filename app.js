@@ -38,6 +38,9 @@ window.navigate = function(screen) {
     case 'photocells':
       renderPhotocellScan();
       break;
+    case 'results':
+      renderResults();
+    break;
     default:
       screenDiv.innerHTML = `<h2>${screen}</h2>`;
   }
