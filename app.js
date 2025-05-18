@@ -1,6 +1,13 @@
-
 let tests = JSON.parse(localStorage.getItem('tests') || '[]');
 let athletes = JSON.parse(localStorage.getItem('athletes') || '[]');
+let startTime = null;
+let animationFrame = null;
+let impulseCount = 0;
+let expectedImpulses = 0;
+let running = false;
+let splits = [];
+let laps = [];
+let inTest = false; // ← NUEVO: indica si estamos en ejecución real
 
 function renderNewTestForm() {
   const screen = document.getElementById('screen');
@@ -12,7 +19,6 @@ function renderNewTestForm() {
   `;
 }
 
-
 function saveTest() {
   const test = {
     name: document.getElementById('testName').value,
@@ -22,108 +28,6 @@ function saveTest() {
   localStorage.setItem('tests', JSON.stringify(tests));
   alert("Test saved.");
 }
-
-function selectAthletesForTest(index) {
-  const test = tests[index];
-  const screen = document.getElementById('screen');
-  screen.innerHTML = `
-    <h2>Selected Test: ${test.name}</h2>
-    <p>This is a placeholder. From here you could load athletes or start the test logic.</p>
-  `;
-}
-
-
-window.navigate = function(screen) {
-  const screenDiv = document.getElementById('screen');
-  if (!screenDiv) return;
-
-  switch (screen) {
-    case 'testMenu':
-      screenDiv.innerHTML = `
-        <h2>Test Menu</h2>
-        <button onclick="navigate('simpleTest')">Simple Test</button>
-        <button onclick="navigate('myTests')">My Tests</button>
-        <button onclick="navigate('predefinedTests')">Predefined Tests</button>
-        <button onclick="navigate('newTest')">New Test</button>
-      `;
-      break;
-    case 'newTest':
-      renderNewTestForm();
-      break;
-      case 'myTests':
-      renderTestList();
-      break;
-    case 'athletes':
-      renderAthleteManager();
-      break;
-    case 'results':
-      renderResults();
-      break;
-    case 'photocells':
-      renderPhotocellScan();
-      break;
-    default:
-      screenDiv.innerHTML = `<p>Pantalla ${screen} no implementada aún.</p>`;
-  }
-};
-
-function renderTestList() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML = "<h2>My Tests</h2>";
-  if (!tests.length) {
-    screen.innerHTML += "<p>No saved tests.</p>";
-    return;
-  }
-  tests.forEach((t, i) => {
-    const div = document.createElement('div');
-    div.innerHTML = `
-      <p><strong>${t.name}</strong> (${t.impulses} impulses)</p>
-      <button onclick="selectAthletesForTest(${i})">Select Test</button>
-    `;
-    screen.appendChild(div);
-  });
-}
-
-
-function renderAthleteManager() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML = `
-    <h2>Athletes</h2>
-    <label>Name: <input id="aName"></label><br>
-    <label>Club: <input id="aClub"></label><br>
-    <button onclick="saveAthlete()">Save Athlete</button>
-    <ul id="athleteList"></ul>
-  `;
-  updateAthleteList();
-}
-
-function saveAthlete() {
-  const athlete = {
-    name: document.getElementById('aName').value,
-    club: document.getElementById('aClub').value
-  };
-  athletes.push(athlete);
-  localStorage.setItem('athletes', JSON.stringify(athletes));
-  updateAthleteList();
-}
-
-function updateAthleteList() {
-  const ul = document.getElementById('athleteList');
-  if (!ul) return;
-  ul.innerHTML = "";
-  athletes.forEach(a => {
-    const li = document.createElement('li');
-    li.textContent = a.name + " (" + a.club + ")";
-    ul.appendChild(li);
-  });
-}
-
-function renderResults() {
-  const screen = document.getElementById('screen');
-  screen.innerHTML = "<h2>Results</h2><p>No results to show.</p>";
-}
-
-
 
 function selectAthletesForTest(index) {
   const test = tests[index];
@@ -174,9 +78,92 @@ function removeFromTest() {
 function startMultiAthleteTest() {
   const testList = document.getElementById('testAthletes');
   selectedAthletes = [...testList.options].map(opt => opt.value);
-  alert("Starting test with: " + selectedAthletes.join(", "));
+  const test = tests[currentTestIndex];
+  inTest = true;
+  startChronometer(test);
 }
 
+function renderChronoScreen(testName) {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = `
+    <h2>Running Test: ${testName}</h2>
+    <h1 id="chrono" style="font-size: 48px;">00.00</h1>
+    <button onclick="manualStart()">Iniciar cronómetro manualmente</button>
+    <table id="resultsTable" border="1">
+      <thead><tr><th>Split</th><th>Lap</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  `;
+}
+
+function manualStart() {
+  if (!running) {
+    startTime = performance.now();
+    running = true;
+    updateChrono();
+  }
+}
+
+function formatTime(ms) {
+  const sec = Math.floor(ms / 1000);
+  const cent = Math.floor((ms % 1000) / 10);
+  return `${sec.toString().padStart(2, '0')}.${cent.toString().padStart(2, '0')}`;
+}
+
+function startChronometer(test) {
+  impulseCount = 0;
+  expectedImpulses = test.impulses + 1;
+  splits = [];
+  laps = [];
+  running = false;
+  renderChronoScreen(test.name);
+}
+
+function handleImpulse() {
+  const now = performance.now();
+
+  if (!inTest) return; // ← solo actúa si estamos dentro del test
+
+  if (!running) {
+    startTime = now;
+    running = true;
+    updateChrono();
+    return;
+  }
+
+  const elapsed = now - startTime;
+  impulseCount++;
+
+  const lastLap = laps.length ? laps[laps.length - 1] : 0;
+  const lap = elapsed;
+  const split = elapsed - lastLap;
+
+  laps.push(lap);
+  splits.push(split);
+
+  const tbody = document.querySelector("#resultsTable tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `<td>${formatTime(split)}</td><td>${formatTime(lap)}</td>`;
+  tbody.appendChild(row);
+
+  if (impulseCount >= expectedImpulses - 1) {
+    stopChrono();
+  }
+}
+
+function updateChrono() {
+  if (!running) return;
+  const now = performance.now();
+  const elapsed = now - startTime;
+  document.getElementById("chrono").textContent = formatTime(elapsed);
+  animationFrame = requestAnimationFrame(updateChrono);
+}
+
+function stopChrono() {
+  running = false;
+  inTest = false;
+  cancelAnimationFrame(animationFrame);
+}
 
 function renderPhotocellScan() {
   const screen = document.getElementById("screen");
@@ -203,12 +190,8 @@ function scanPhotocells() {
     device = dev;
     return device.gatt.connect();
   })
-  .then(server => {
-    return server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-  })
-  .then(service => {
-    return service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-  })
+  .then(server => server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb'))
+  .then(service => service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb'))
   .then(char => {
     characteristic = char;
     return characteristic.startNotifications();
@@ -217,7 +200,10 @@ function scanPhotocells() {
     characteristic.addEventListener('characteristicvaluechanged', event => {
       const decoded = new TextDecoder().decode(event.target.value);
       console.log("📡 Trama recibida:", decoded);
-      alert("Trama recibida: " + decoded);
+
+      if (!inTest) alert("Trama recibida: " + decoded); // solo alerta fuera del test
+
+      handleImpulse(); // este solo actúa si estamos en test
     });
 
     const ul = document.getElementById('deviceList');
@@ -233,3 +219,57 @@ function scanPhotocells() {
   });
 }
 
+function renderTestList() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>My Tests</h2>";
+  if (!tests.length) {
+    screen.innerHTML += "<p>No saved tests.</p>";
+    return;
+  }
+  tests.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <p><strong>${t.name}</strong> (${t.impulses} impulses)</p>
+      <button onclick="selectAthletesForTest(${i})">Select Test</button>
+    `;
+    screen.appendChild(div);
+  });
+}
+
+function renderAthleteManager() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = `
+    <h2>Athletes</h2>
+    <label>Name: <input id="aName"></label><br>
+    <label>Club: <input id="aClub"></label><br>
+    <button onclick="saveAthlete()">Save Athlete</button>
+    <ul id="athleteList"></ul>
+  `;
+  updateAthleteList();
+}
+
+function saveAthlete() {
+  const athlete = {
+    name: document.getElementById('aName').value,
+    club: document.getElementById('aClub').value
+  };
+  athletes.push(athlete);
+  localStorage.setItem('athletes', JSON.stringify(athletes));
+  updateAthleteList();
+}
+
+function updateAthleteList() {
+  const ul = document.getElementById('athleteList');
+  if (!ul) return;
+  ul.innerHTML = "";
+  athletes.forEach(a => {
+    const li = document.createElement('li');
+    li.textContent = a.name + " (" + a.club + ")";
+    ul.appendChild(li);
+  });
+}
+
+function renderResults() {
+  const screen = document.getElementById('screen');
+  screen.innerHTML = "<h2>Results</h2><p>No results to show.</p>";
+}
