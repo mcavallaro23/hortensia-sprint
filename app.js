@@ -202,10 +202,8 @@ function scanPhotocells() {
     characteristic.addEventListener('characteristicvaluechanged', event => {
       const decoded = new TextDecoder().decode(event.target.value);
       console.log("📡 Trama recibida:", decoded);
-      
-      if (!inTest) {
-        alert("Trama recibida: " + decoded);
-      }
+
+      if (!inTest) alert("Trama recibida: " + decoded);
 
       handleImpulse();
     });
