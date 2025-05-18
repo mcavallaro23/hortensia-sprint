@@ -303,6 +303,7 @@ function saveFinalResult(test, results) {
 }
 
 function renderResults() {
+  console.log("renderResults() ejecutado");
   const data = JSON.parse(localStorage.getItem('finishedTests') || '[]');
   const screen = document.getElementById('screen');
   screen.innerHTML = "<h2>Results</h2>";
