@@ -1,7 +1,6 @@
+
 let tests = JSON.parse(localStorage.getItem('tests') || '[]');
 let athletes = JSON.parse(localStorage.getItem('athletes') || '[]');
-let currentTestIndex = null;
-let selectedAthletes = [];
 
 function renderNewTestForm() {
   const screen = document.getElementById('screen');
@@ -13,20 +12,26 @@ function renderNewTestForm() {
   `;
 }
 
+
 function saveTest() {
-  const name = document.getElementById('testName').value.trim();
-  const impulses = parseInt(document.getElementById('impulses').value);
-  if (!name || isNaN(impulses) || impulses < 1) {
-    alert("Please enter a valid test name and impulses.");
-    return;
-  }
-  const test = { name, impulses };
+  const test = {
+    name: document.getElementById('testName').value,
+    impulses: parseInt(document.getElementById('impulses').value)
+  };
   tests.push(test);
   localStorage.setItem('tests', JSON.stringify(tests));
   alert("Test saved.");
-  document.getElementById('testName').value = '';
-  document.getElementById('impulses').value = 3;
 }
+
+function selectAthletesForTest(index) {
+  const test = tests[index];
+  const screen = document.getElementById('screen');
+  screen.innerHTML = `
+    <h2>Selected Test: ${test.name}</h2>
+    <p>This is a placeholder. From here you could load athletes or start the test logic.</p>
+  `;
+}
+
 
 window.navigate = function(screen) {
   const screenDiv = document.getElementById('screen');
@@ -45,7 +50,7 @@ window.navigate = function(screen) {
     case 'newTest':
       renderNewTestForm();
       break;
-    case 'myTests':
+      case 'myTests':
       renderTestList();
       break;
     case 'athletes':
@@ -79,6 +84,7 @@ function renderTestList() {
   });
 }
 
+
 function renderAthleteManager() {
   const screen = document.getElementById('screen');
   screen.innerHTML = `
@@ -92,18 +98,13 @@ function renderAthleteManager() {
 }
 
 function saveAthlete() {
-  const name = document.getElementById('aName').value.trim();
-  const club = document.getElementById('aClub').value.trim();
-  if (!name) {
-    alert("Please enter the athlete's name.");
-    return;
-  }
-  const athlete = { name, club };
+  const athlete = {
+    name: document.getElementById('aName').value,
+    club: document.getElementById('aClub').value
+  };
   athletes.push(athlete);
   localStorage.setItem('athletes', JSON.stringify(athletes));
   updateAthleteList();
-  document.getElementById('aName').value = '';
-  document.getElementById('aClub').value = '';
 }
 
 function updateAthleteList() {
@@ -121,6 +122,8 @@ function renderResults() {
   const screen = document.getElementById('screen');
   screen.innerHTML = "<h2>Results</h2><p>No results to show.</p>";
 }
+
+
 
 function selectAthletesForTest(index) {
   const test = tests[index];
@@ -154,13 +157,8 @@ function addToTest() {
   const all = document.getElementById('allAthletes');
   const testList = document.getElementById('testAthletes');
   [...all.selectedOptions].forEach(opt => {
-    if (![...testList.options].some(o => o.value === opt.value)) {
-      const newOpt = document.createElement('option');
-      newOpt.value = opt.value;
-      newOpt.textContent = opt.textContent;
-      testList.appendChild(newOpt);
-      opt.remove();
-    }
+    testList.innerHTML += `<option value="${opt.value}">${opt.textContent}</option>`;
+    opt.remove();
   });
 }
 
@@ -168,13 +166,8 @@ function removeFromTest() {
   const testList = document.getElementById('testAthletes');
   const all = document.getElementById('allAthletes');
   [...testList.selectedOptions].forEach(opt => {
-    if (![...all.options].some(o => o.value === opt.value)) {
-      const newOpt = document.createElement('option');
-      newOpt.value = opt.value;
-      newOpt.textContent = opt.textContent;
-      all.appendChild(newOpt);
-      opt.remove();
-    }
+    all.innerHTML += `<option value="${opt.value}">${opt.textContent}</option>`;
+    opt.remove();
   });
 }
 
@@ -183,6 +176,7 @@ function startMultiAthleteTest() {
   selectedAthletes = [...testList.options].map(opt => opt.value);
   alert("Starting test with: " + selectedAthletes.join(", "));
 }
+
 
 function renderPhotocellScan() {
   const screen = document.getElementById("screen");
@@ -218,3 +212,4 @@ function scanPhotocells() {
     alert('BLE error: ' + error.message);
   });
 }
+
