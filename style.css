@@ -45,6 +45,18 @@ tr:nth-child(even) {
   background-color: #181818;
 }
 
+/* ¡NUEVO ESTILO PA' RESALTAR AL ATLETA SELECCIONADO, CHE! */
+.selected-athlete {
+    background-color: #4CAF50; /* Un verde piola para resaltar */
+    color: white;
+    font-weight: bold;
+    cursor: pointer; /* Para indicar q es clickeable */
+}
+
+.selected-athlete:hover {
+    background-color: #45a049; /* Un verde un toque más oscuro al pasar el mouse */
+}
+
 @media (max-width: 600px) {
   .athlete-selection {
     flex-direction: column !important;
