@@ -89,20 +89,12 @@ function renderChronoScreen(testName) {
   screen.innerHTML = `
     <h2>Running Test: ${testName}</h2>
     <h1 id="chrono" style="font-size: 48px;">00.00</h1>
-    <button onclick="manualStart()">Iniciar cronómetro manualmente</button>
+    <button onclick="handleImpulse()">Simular fotocélula</button>
     <table id="resultsTable" border="1">
-      <thead><tr><th>Split</th><th>Lap</th></tr></thead>
+      <thead><tr><th>Lap</th><th>Split</th></tr></thead>
       <tbody></tbody>
     </table>
   `;
-}
-
-function manualStart() {
-  if (!running) {
-    startTime = performance.now();
-    running = true;
-    updateChrono();
-  }
 }
 
 function startChronometer(test) {
@@ -137,7 +129,7 @@ function handleImpulse() {
 
   const tbody = document.querySelector("#resultsTable tbody");
   const row = document.createElement("tr");
-  row.innerHTML = `<td>${formatTime(split)}</td><td>${formatTime(lap)}</td>`;
+  row.innerHTML = `<td>${formatTime(lap)}</td><td>${formatTime(split)}</td>`;
   tbody.appendChild(row);
 
   if (impulseCount >= expectedImpulses - 1) stopChrono();
@@ -284,13 +276,17 @@ function renderAthleteManager() {
 }
 
 function saveAthlete() {
+  const nameInput = document.getElementById('aName');
+  const clubInput = document.getElementById('aClub');
   const athlete = {
-    name: document.getElementById('aName').value,
-    club: document.getElementById('aClub').value
+    name: nameInput.value,
+    club: clubInput.value
   };
   athletes.push(athlete);
   localStorage.setItem('athletes', JSON.stringify(athletes));
   updateAthleteList();
+  nameInput.value = '';
+  clubInput.value = '';
 }
 
 function updateAthleteList() {
