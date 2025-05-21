@@ -91,7 +91,7 @@ function renderChronoScreen(testName) {
     <h1 id="chrono" style="font-size: 48px;">00.00</h1>
     <button onclick="handleImpulse()">Simular fotocélula</button>
     <table id="resultsTable" border="1">
-      <thead><tr><th>Lap</th><th>Split</th></tr></thead>
+      <thead><tr><th>Split</th><th>Lap</th></tr></thead>
       <tbody></tbody>
     </table>
   `;
@@ -129,7 +129,7 @@ function handleImpulse() {
 
   const tbody = document.querySelector("#resultsTable tbody");
   const row = document.createElement("tr");
-  row.innerHTML = `<td>${formatTime(lap)}</td><td>${formatTime(split)}</td>`;
+  row.innerHTML = `<td>${formatTime(split)}</td><td>${formatTime(lap)}</td>`;
   tbody.appendChild(row);
 
   if (impulseCount >= expectedImpulses - 1) stopChrono();
